@@ -2,27 +2,29 @@
 
 declare(strict_types=1);
 
-use App\Models\User;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByPath;
 
+InitializeTenancyByPath::$onFail = function ($exception, $request, $next) {
+    abort(404, 'Empresa não encontrada.');
+};
+
+
 
 Route::group([
-	'prefix' => '/{tenant}',
-	'middleware' => [InitializeTenancyByPath::class],
+    'prefix' => '/{tenant}',
+    'middleware' => ['web',InitializeTenancyByPath::class],
 ], function () {
-	Route::get('/', function () {
-		User::all();
 
-		return view('welcome');
-		// dd('tenant.php executed and tenant found:' . tenant('id'));
-	});
+    Route::get('/login', [LoginController::class, 'index'])->middleware('tenant.guest')->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
-	Route::get('/signup', function () {
-		dd('signup page executed and tenant found:' . tenant('id'));
-	});
+    Route::middleware(['tenant.session','role:tenant_administrator'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('tenant.dashboard');
+    });
+
 });
 
-InitializeTenancyByPath::$onFail = function ($exception, $request, $next) {
-	dd('error');
-};
+

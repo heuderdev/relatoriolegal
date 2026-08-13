@@ -14,10 +14,15 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email'); 
+            $table->string('tenant_id')->nullable(); 
+            $table->string('cpf_cnpj')->nullable(); 
+            $table->unique(['email', 'tenant_id']);
             $table->timestamp('email_verified_at')->nullable();
+            $table->boolean('is_admin')->default(false);
+            $table->enum('role', ['administrator','tenant_administrator','employee', 'customer'])->default('customer');
+            $table->json('permissions_json')->nullable();
             $table->string('password');
-            $table->string('tenant_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

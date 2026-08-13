@@ -22,6 +22,7 @@ class UserSeeder extends Seeder
                 'name' => fake()->name(),
                 'email' => "usuario{$index}@example.com",
                 'tenant_id' => $tenantId,
+                'password' => bcrypt('12345678'), // Use bcrypt to hash the password
             ]);
         }
     }
