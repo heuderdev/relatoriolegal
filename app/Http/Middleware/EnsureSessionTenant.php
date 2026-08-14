@@ -12,10 +12,9 @@ class EnsureSessionTenant
         $user = $request->user();
         $currentTenantId = (string) tenant('id');
 
-
         if (!$user) {
             return redirect()
-                ->route('login', ['tenant' => $currentTenantId])
+                ->route('login')
                 ->withErrors([
                     'email' => 'Faça login novamente para esta empresa.',
                 ]);
@@ -23,7 +22,6 @@ class EnsureSessionTenant
 
         $sessionTenantId = (string) $request->session()
             ->get('authenticated_tenant_id');
-
 
 
         if (!$sessionTenantId || $sessionTenantId !== $currentTenantId) {
@@ -34,7 +32,7 @@ class EnsureSessionTenant
 
 
             return redirect()
-                ->route('login', ['tenant' => $currentTenantId])
+                ->route('login')
                 ->withErrors([
                     'email' => 'Faça login novamente para esta empresa.',
                 ]);

@@ -31,9 +31,15 @@ class LoginController extends Controller
                 'nullable',
                 'boolean',
             ],
+            'tenant_id' => [
+                'required',
+                'string',
+            ],
         ]);
 
-        $currentTenantId = (string) tenant('id');
+
+
+        $currentTenantId = (string) $credentials['tenant_id'];
 
 
 
@@ -67,5 +73,14 @@ class LoginController extends Controller
         return redirect()->route('tenant.dashboard', [
             'tenant' => $currentTenantId,
         ]);
+    }
+
+    // criar o metodo de deslogar o usuario
+    public function logout(Request $request): RedirectResponse
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerate();
+        return redirect()->route('login');
     }
 }

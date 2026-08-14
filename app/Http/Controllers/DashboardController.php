@@ -10,6 +10,8 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        dd($user ? $user->toArray() : null);
+        return view('dashboard', [
+            'user' => $user,
+        ]);
     }
 }
