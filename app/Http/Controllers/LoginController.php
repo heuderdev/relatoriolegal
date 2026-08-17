@@ -30,22 +30,17 @@ class LoginController extends Controller
             'remember' => [
                 'nullable',
                 'boolean',
-            ],
-            'tenant_id' => [
-                'required',
-                'string',
-            ],
+            ]
         ]);
 
 
 
-        $currentTenantId = (string) $credentials['tenant_id'];
+
 
 
 
         $user = User::query()
             ->where('email', $credentials['email'])
-            ->where('tenant_id', $currentTenantId)
             ->first();
 
 
@@ -65,14 +60,9 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        $request->session()->put(
-            'authenticated_tenant_id',
-            $currentTenantId
-        );
 
-        return redirect()->route('tenant.dashboard', [
-            'tenant' => $currentTenantId,
-        ]);
+
+        return redirect()->route('teste');
     }
 
     // criar o metodo de deslogar o usuario

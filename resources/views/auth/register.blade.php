@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Criar conta - {{ tenant('id') }}</title>
+    <title>Criar conta</title>
 
     <style>
         :root {
@@ -53,7 +53,7 @@
 
         .register-card {
             width: 100%;
-            max-width: 800px;
+            max-width: 520px;
             padding: 38px 34px;
             background: var(--card);
             border: 1px solid rgba(229, 231, 235, 0.9);
@@ -91,17 +91,6 @@
         .subtitle {
             color: var(--muted);
             font-size: 0.92rem;
-        }
-
-        .tenant-label {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 5px 10px;
-            color: var(--primary-dark);
-            background: #eff6ff;
-            border-radius: 999px;
-            font-size: 0.78rem;
-            font-weight: 600;
         }
 
         .alert {
@@ -286,10 +275,6 @@
             <p class="subtitle">
                 Preencha os dados para criar seu acesso.
             </p>
-
-            <span class="tenant-label">
-                Empresa: {{ tenant('id') }}
-            </span>
         </header>
 
         @if (session('success'))
@@ -304,12 +289,7 @@
             </div>
         @endif
 
-        <form
-            method="POST"
-            action="{{ route('register.store', [
-                'tenant' => tenant('id'),
-            ]) }}"
-        >
+        <form method="POST" action="{{ route('register.store') }}">
             @csrf
 
             <div class="form-grid">
@@ -387,7 +367,7 @@
                         id="password"
                         name="password"
                         class="{{ session('errors')?->has('password') ? 'is-invalid' : '' }}"
-                        placeholder="Mínimo de 8 caracteres"
+                        placeholder="Mí¬¬nimo de 8 caracteres"
                         required
                     >
 
@@ -419,9 +399,7 @@
 
             <div class="actions">
                 <a
-                    href="{{ route('login', [
-                        'tenant' => tenant('id'),
-                    ]) }}"
+                    href="{{ route('login') }}"
                     class="button button-secondary"
                 >
                     Já tenho conta
@@ -432,11 +410,6 @@
                 </button>
             </div>
         </form>
-
-        <p class="footer">
-            O cadastro será criado na empresa
-            <strong>{{ tenant('id') }}</strong>.
-        </p>
     </main>
 </body>
 </html>

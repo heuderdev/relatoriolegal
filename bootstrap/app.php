@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureSessionTenant;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\GuestCustom;
 use App\Http\Middleware\RedirectAuthenticatedUser;
+use App\Http\Middleware\ResolveDefaultTenant;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureUserHasRole::class,
             'tenant.guest' => RedirectAuthenticatedUser::class,
             'guest.custom' => GuestCustom::class,
+            'tenant.default' => ResolveDefaultTenant::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

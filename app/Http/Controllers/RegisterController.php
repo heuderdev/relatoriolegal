@@ -33,6 +33,7 @@ class RegisterController extends Controller
                 'string',
                 'email',
                 'max:255',
+                'unique:users,email',
             ],
 
             'cpf_cnpj' => [
@@ -49,45 +50,49 @@ class RegisterController extends Controller
             ],
         ]);
 
-        $tenantId = 'empresa_' . Str::uuid()->toString();
-
-        [$tenant, $user] = DB::transaction(function () use (
-            $data,
-            $tenantId
-        ) {
-            $tenant = Tenant::create([
-                'id' => $tenantId,
-                'data' => [
+        [$tenant, $user] = DB::transaction(
+            function () use ($data): array {
+                $tenant = Tenant::create([
+                    'uuid' => (string) Str::uuid(),
                     'name' => $data['name'],
-                    'owner_email' => $data['email'],
-                ],
-            ]);
+                    'slug' => sprintf(
+                        '%s-%s',
+                        Str::slug($data['name']),
+                        Str::lower(Str::random(6))
+                    ),
+                    'type' => 'company',
+                    'status' => 'active',
+                    'timezone' => 'America/Sao_Paulo',
+                    'locale' => 'pt_BR',
+                ]);
 
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'tenant_id' => $tenant->id,
-                'cpf_cnpj' => $data['cpf_cnpj'] ?? null,
-                'is_admin' => true,
-                'role' => 'tenant_administrator',
-                'permissions_json' => null,
-                'password' => Hash::make($data['password']),
-            ]);
+                $user = User::create([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'cpf_cnpj' => $data['cpf_cnpj'] ?? null,
+                    'password' => Hash::make(
+                        $data['password']
+                    ),
+                    'tenant_default_id' => $tenant->id,
+                ]);
 
-            return [$tenant, $user];
-        });
+                $tenant->users()->attach($user->id, [
+                    'role' => 'owner',
+                    'status' => 'active',
+                    'joined_at' => now(),
+                ]);
+
+                return [
+                    $tenant,
+                    $user,
+                ];
+            }
+        );
 
         Auth::login($user);
 
         $request->session()->regenerate();
 
-        $request->session()->put(
-            'authenticated_tenant_id',
-            $tenant->id
-        );
-
-        return redirect()->route('tenant.dashboard', [
-            'tenant' => $tenant->id,
-        ]);
+        return redirect()->route('teste'        );
     }
 }

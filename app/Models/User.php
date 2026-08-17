@@ -2,55 +2,60 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
-/**
- * @property int $id
- * @property string $name
- * @property string $email
- * @property Carbon|null $email_verified_at
- * @property string $password
- * @property string|null $remember_token
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- */
-#[Fillable(['name', 'email', 'password','is_admin','role','permissions_json','tenant_id'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, BelongsToTenant;
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'tenant_default_id',
+    ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    public function tenants(): BelongsToMany
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsToMany(Tenant::class)
+            ->using(TenantUser::class)
+            ->withPivot([
+                'role',
+                'status',
+                'joined_at',
+            ])
+            ->withTimestamps();
     }
 
-    /**
-     * Get the user's initials
-     */
-    public function initials(): string
+    public function defaultTenant(): BelongsTo
     {
-        $initials = Str::initials($this->name, true);
-
-        return Str::length($initials) > 1
-            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
-            : $initials;
+        return $this->belongsTo(
+            Tenant::class,
+            'tenant_default_id'
+        );
     }
+
+    public function belongsToTenant(
+        int $tenantId
+    ): bool {
+        return $this->tenants()
+            ->whereKey($tenantId)
+            ->wherePivot('status', 'active')
+            ->exists();
+    }
+
+
+    public function sentTenantInvitations(): HasMany
+{
+    return $this->hasMany(
+        TenantInvitation::class,
+        'invited_by'
+    );
+}
 }
